@@ -12,18 +12,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".menu">
+        <activity android:name=".MainMenu">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ProductScreen"/>
         <activity android:name=".login_activity"
             >
             <!-- The meta-data tag is required if you support API level 15 and lower -->
           <!--  <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".menu" />-->
+                android:value=".MainMenu" />-->
         </activity>
         <activity android:name=".RegisterActivity"
             android:parentActivityName=".login_activity">

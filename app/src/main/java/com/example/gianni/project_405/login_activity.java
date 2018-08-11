@@ -20,7 +20,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
-import org.json.simple.JSONValue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,13 +29,14 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import com.example.gianni.project_405.model.User;
-
-import static com.example.gianni.project_405.menu.user;
+import static com.example.gianni.project_405.MainMenu.user;
 import static java.security.MessageDigest.getInstance;
 
 
 public class login_activity extends AppCompatActivity implements View.OnClickListener {
+
+    public static final String LOGIN_URL = Constants.SERVER_URL+"/listener_login.php";
+
     private final AppCompatActivity activity = login_activity.this;
 
     private NestedScrollView nestedScrollView;
@@ -101,7 +101,7 @@ public class login_activity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.appCompatButtonLogin:
-                 new login_async().execute("https://project.vangehugten.org/listener.php");
+                 new login_async().execute(LOGIN_URL);
                 break;
             case R.id.textViewLinkRegister:
                 // Navigate to RegisterActivity
@@ -187,7 +187,7 @@ public class login_activity extends AppCompatActivity implements View.OnClickLis
 
         // 11. return result
         // Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
-        //Log.d("user",String.valueOf(menu.user.getId()));
+        //Log.d("user",String.valueOf(MainMenu.user.getId()));
         return result;
     }
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
@@ -226,7 +226,7 @@ public class login_activity extends AppCompatActivity implements View.OnClickLis
 
             if(result != "false user combo") {
                 emptyInputEditText();
-                Intent intent = new Intent(getApplicationContext(), menu.class);
+                Intent intent = new Intent(getApplicationContext(), MainMenu.class);
                 startActivity(intent);
             }
 

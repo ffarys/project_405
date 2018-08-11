@@ -16,6 +16,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.HttpParams;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -39,7 +40,9 @@ import com.google.zxing.integration.android.IntentResult;
 
 
 
-public class menu extends AppCompatActivity implements OnClickListener {
+public class MainMenu extends AppCompatActivity implements OnClickListener {
+
+    public static String LISTENER_BARCODE_URL = Constants.SERVER_URL+"/listener_barcode.php";
 
     private Button scanBtn, loginBtn;
     private TextView formatTxt, contentTxt;
@@ -61,10 +64,10 @@ public class menu extends AppCompatActivity implements OnClickListener {
         loginBtn.setOnClickListener(this);
         if(isConnected()){//kijkt of je internet verbinding hebt
             appIsConnected.setBackgroundColor(0xFF00CC00);
-            appIsConnected.setText("You are conncted");
+            appIsConnected.setText("You are connected");
         }
         else{
-            appIsConnected.setText("You are NOT conncted");
+            appIsConnected.setText("You are NOT connected");
         }
         if(user.getName()!=null){
             loginBtn.setText(user.getName()+" logout");
@@ -106,7 +109,7 @@ public class menu extends AppCompatActivity implements OnClickListener {
             formatTxt.setText("FORMAT: " + scanFormat);//data wordt getoont op het scerm
             contentTxt.setText("CONTENT: " + scanContent);
 
-            new HttpAsyncTask().execute("https://project.vangehugten.org/listener_barcode.php"); //de functie voor de http json comunicatie wordt opgestart
+            new HttpAsyncTask().execute(LISTENER_BARCODE_URL); //de functie voor de http json comunicatie wordt opgestart
 
         } else {
             Toast toast = Toast.makeText(getApplicationContext(),
@@ -134,32 +137,33 @@ public class menu extends AppCompatActivity implements OnClickListener {
             // 2. make POST request to the given URL
             HttpPost httpPost = new HttpPost(url);
 
-            String json = "";
+//            String json = "";
 
-            // 3. build jsonObject
-            JSONObject data = new JSONObject();
-            data.accumulate("user_id", user.getId());
-            data.accumulate("barcode", scanContent);
-            // url where the data will be posted
-
-
-
-
-            // 4. convert JSONObject to JSON to String
-            json = data.toString();
-            Log.d("json", json  );
-
-            // 5. set json to StringEntity
-            StringEntity se = new StringEntity(json);
-            Log.d("string",se.toString());
-
-            // 6. set httpPost Entity
-           httpPost.setEntity(se);
-
+//            // 3. build jsonObject
+//            JSONObject data = new JSONObject();
+//            data.accumulate("user_id", user.getId());
+//            data.accumulate("barcode", scanContent);
+//
+//
+//            // 4. convert JSONObject to JSON to String
+//            json = data.toString();
+//            Log.d("json", json  );
+//
+//            // 5. set json to StringEntity
+//            StringEntity se = new StringEntity(json);
+//            Log.d("string",se.toString());
+//
+//            // 6. set httpPost Entity
+//           httpPost.setEntity(se);
 
             // 7. Set some headers to inform server about the type of the content
            // httpPost.setHeader("Accept", "application/json");
             //httpPost.setHeader("Content-type", "application/json");
+
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("user_id", user.getId()));
+            params.add(new BasicNameValuePair("barcode", scanContent));
+            httpPost.setEntity(new UrlEncodedFormEntity(params));
 
             // 8. Execute POST request to the given URL
             HttpResponse httpResponse = httpclient.execute(httpPost);
@@ -168,18 +172,33 @@ public class menu extends AppCompatActivity implements OnClickListener {
             // 9. receive response as inputStream
             inputStream = httpResponse.getEntity().getContent();
 
-            // 10. convert inputstream to string
-            if(inputStream != null)
+            // 10. convert inputstream to json and extract information
+            if(inputStream != null) {
                 result = convertInputStreamToString(inputStream);
-            else
-                result = "Did not work!";
+                JSONObject jsonObject = new JSONObject(result);
+                int error = jsonObject.getInt("error");
+                if (error == 0) {
+                    Intent intent = new Intent(getApplicationContext(), ProductScreen.class);
+                    intent.putExtra("name", jsonObject.getString("name"));
+                    intent.putExtra("type", jsonObject.getString("type"));
+                    intent.putExtra("stock", jsonObject.getString("stock"));
+                    intent.putExtra("reorderlevel", jsonObject.getString("reorderlevel"));
+                    startActivity(intent);
+                } else {
+                    String message = jsonObject.getString("message");
+                    Toast.makeText(getBaseContext(), "message", Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(getBaseContext(), "Did not work!", Toast.LENGTH_LONG).show();
+            }
 
         } catch (Exception e) {
             Log.d("InputStream", e.getLocalizedMessage());
         }
 
         // 11. return result
-       // Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
+        // Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
+
         return result;
     }
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
@@ -203,7 +222,7 @@ public class menu extends AppCompatActivity implements OnClickListener {
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
-            Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
+            // Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
         }
     }
 

@@ -231,7 +231,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
         // 11. return result
         // Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
-        //Log.d("user",String.valueOf(menu.user.getId()));
+        //Log.d("user",String.valueOf(MainMenu.user.getId()));
         return result;
     }
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
@@ -273,7 +273,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
             if(Objects.equals(result, "worked")) {
                 emptyInputEditText();
-                Intent intent = new Intent(getApplicationContext(), menu.class);
+                Intent intent = new Intent(getApplicationContext(), MainMenu.class);
                 startActivity(intent);
             }
 
