@@ -128,7 +128,7 @@ public class MainMenu extends AppCompatActivity implements OnClickListener {
     }
     public String POST_barcode(String url, String scanContent){
         InputStream inputStream = null;
-        String result = "";
+        String result = null;
         try {
 
             // 1. create HttpClient
@@ -174,20 +174,7 @@ public class MainMenu extends AppCompatActivity implements OnClickListener {
 
             // 10. convert inputstream to json and extract information
             if(inputStream != null) {
-                result = convertInputStreamToString(inputStream);
-                JSONObject jsonObject = new JSONObject(result);
-                int error = jsonObject.getInt("error");
-                if (error == 0) {
-                    Intent intent = new Intent(getApplicationContext(), ProductScreen.class);
-                    intent.putExtra("name", jsonObject.getString("name"));
-                    intent.putExtra("type", jsonObject.getString("type"));
-                    intent.putExtra("stock", jsonObject.getString("stock"));
-                    intent.putExtra("reorderlevel", jsonObject.getString("reorderlevel"));
-                    startActivity(intent);
-                } else {
-                    String message = jsonObject.getString("message");
-                    Toast.makeText(getBaseContext(), "message", Toast.LENGTH_LONG).show();
-                }
+                result = Constants.convertInputStreamToString(inputStream);
             } else {
                 Toast.makeText(getBaseContext(), "Did not work!", Toast.LENGTH_LONG).show();
             }
@@ -201,18 +188,6 @@ public class MainMenu extends AppCompatActivity implements OnClickListener {
 
         return result;
     }
-    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String line = "";
-        String result = "";
-        while ((line = bufferedReader.readLine()) != null){
-            result += line;
-            }
-        inputStream.close();
-        return result;
-
-    }
-
 
    final public class HttpAsyncTask extends AsyncTask<String, Void, String> {
         @Override
@@ -222,7 +197,24 @@ public class MainMenu extends AppCompatActivity implements OnClickListener {
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
-            // Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
+            try {
+                JSONObject jsonObject = new JSONObject(result);
+                int error = jsonObject.getInt("error");
+                if (error == 0) {
+                    Intent intent = new Intent(getApplicationContext(), ProductScreen.class);
+                    intent.putExtra("typeId", jsonObject.getInt("typeId"));
+                    intent.putExtra("name", jsonObject.getString("name"));
+                    intent.putExtra("type", jsonObject.getString("type"));
+                    intent.putExtra("stock", jsonObject.getInt("stock"));
+                    intent.putExtra("reorderlevel", jsonObject.getInt("reorderlevel"));
+                    startActivity(intent);
+                } else {
+                    String message = jsonObject.getString("message");
+                    Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG).show();
+                }
+            } catch(Exception e) {
+                Log.d("JSON Decode", e.getLocalizedMessage());
+            }
         }
     }
 
